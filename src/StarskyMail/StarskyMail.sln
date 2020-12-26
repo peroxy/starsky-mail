@@ -2,6 +2,15 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarskyMail.Queue.Api", "StarskyMail.Queue.Api\StarskyMail.Queue.Api.csproj", "{6CB16668-1401-419F-8463-51FD90838C8B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "devops", "devops", "{6873B4A1-E11A-4CF4-ABD8-FF7CF694C6EA}"
+ProjectSection(SolutionItems) = preProject
+	..\..\docker-compose.yml = ..\..\docker-compose.yml
+	..\..\.env = ..\..\.env
+	..\..\.gitignore = ..\..\.gitignore
+	..\..\README.md = ..\..\README.md
+	..\..\LICENSE = ..\..\LICENSE
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

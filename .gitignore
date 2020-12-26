@@ -38,6 +38,7 @@ msbuild.wrn
 
 # etc
 log.txt
+.env
 
 # Common IntelliJ Platform excludes
 
