@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarskyMail.Api", "StarskyMail.Api\StarskyMail.Api.csproj", "{6CB16668-1401-419F-8463-51FD90838C8B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarskyMail.Queue.Api", "StarskyMail.Queue.Api\StarskyMail.Queue.Api.csproj", "{6CB16668-1401-419F-8463-51FD90838C8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
