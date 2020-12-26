@@ -62,3 +62,5 @@ log.txt
 **/.idea/**/*.iml
 **/.idea/**/contentModel.xml
 **/.idea/**/modules.xml
+
+.docker/
