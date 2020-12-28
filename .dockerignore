@@ -1,0 +1,14 @@
+# directories
+**/bin/
+**/obj/
+**/out/
+
+# files
+Dockerfile*
+**/*.md
+
+.gitignore
+.env
+.git/
+log.txt
+**/.idea/

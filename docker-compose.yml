@@ -10,3 +10,16 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+  api:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      "RabbitMQSettings:Password" : ${RABBITMQ_DEFAULT_PASS}
+    build:
+      context: .
+      dockerfile: src/StarskyMail/StarskyMail.Queue.Api/Dockerfile
+    ports:
+      - 56789:56789
+    container_name: starsky_queue_api
+    depends_on:
+      - rabbitmq
+    network_mode: host
