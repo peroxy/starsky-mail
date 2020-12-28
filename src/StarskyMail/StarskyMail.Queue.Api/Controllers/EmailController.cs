@@ -1,7 +1,9 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using StarskyMail.Queue.Api.Models;
@@ -14,19 +16,19 @@ namespace StarskyMail.Queue.Api.Controllers
     {
         private readonly ILogger<EmailController> _logger;
         private readonly QueueConfiguration _configuration;
+        private readonly RabbitMQSettings _rabbitSettings;
         
-        private const string ExchangeName = "starsky";
-        private const string InvitationsQueueName = "starsky.invitations";
-        private const string InvitationsRoutingKey = "invitations";
-
-        public EmailController(ILogger<EmailController> logger, QueueConfiguration configuration)
+        public EmailController(ILogger<EmailController> logger, QueueConfiguration configuration, IOptions<RabbitMQSettings> rabbitSettings)
         {
             _logger = logger;
             _configuration = configuration;
+            _rabbitSettings = rabbitSettings.Value;
         }
 
         [HttpPost]
         [Route("/invitations")]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
         public ActionResult AddInvitationToQueue([FromBody] InvitationModel model)
         {
             var result = ValidateInvitation(model);
@@ -38,11 +40,15 @@ namespace StarskyMail.Queue.Api.Controllers
             using var connection = _configuration.GetConnection();
             using var channel = connection.CreateModel();
 
-            channel.ExchangeDeclare(ExchangeName, ExchangeType.Direct, true, false, null);
-            channel.QueueDeclare(InvitationsQueueName, true, false, false, null);
-            channel.QueueBind(InvitationsQueueName, ExchangeName, InvitationsRoutingKey);
-            
-            channel.BasicPublish(ExchangeName, InvitationsRoutingKey, null, Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model)));
+            channel.ExchangeDeclare(_rabbitSettings.ExchangeName, ExchangeType.Direct, true, false, null);
+            channel.QueueDeclare(_rabbitSettings.InvitationsQueueName, true, false, false, null);
+            channel.QueueBind(_rabbitSettings.InvitationsQueueName, _rabbitSettings.ExchangeName, _rabbitSettings.InvitationsRoutingKey);
+
+            channel.BasicPublish(
+                _rabbitSettings.ExchangeName,
+                _rabbitSettings.InvitationsRoutingKey,
+                null,
+                Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model)));
             
             channel.Close();
 

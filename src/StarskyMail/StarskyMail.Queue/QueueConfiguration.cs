@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
 namespace StarskyMail.Queue
@@ -7,27 +8,18 @@ namespace StarskyMail.Queue
     public class QueueConfiguration
     {
         private readonly ConnectionFactory _factory;
-        private const string UserEnvironmentVariable = "RABBITMQ_DEFAULT_USER";
-        private const string PasswordEnvironmentVariable = "RABBITMQ_DEFAULT_PASS";
         
-        public QueueConfiguration(IConfiguration configuration)
+        public QueueConfiguration(IOptions<RabbitMQSettings> configuration)
         {
-            if (string.IsNullOrWhiteSpace(configuration[UserEnvironmentVariable]))
-            {
-                throw new InvalidOperationException($"{UserEnvironmentVariable} environment variable not set!");
-            }
-            
-            if (string.IsNullOrWhiteSpace(configuration[PasswordEnvironmentVariable]))
-            {
-                throw new InvalidOperationException($"{PasswordEnvironmentVariable} environment variable not set!");
-            }
+            var config = configuration.Value;
             
             _factory = new ConnectionFactory
             {
-                UserName = configuration[UserEnvironmentVariable],
-                Password = configuration[PasswordEnvironmentVariable],
+                UserName = config.Username,
+                Password = config.Password,
+                HostName = config.Hostname,
+                Port = config.Port
             };
-            
         }
         
         public IConnection GetConnection()

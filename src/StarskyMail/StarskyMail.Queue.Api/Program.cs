@@ -16,7 +16,7 @@ namespace StarskyMail.Queue.Api
                 .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); })
                 .ConfigureAppConfiguration((context, builder) =>
                 {
-                    builder.AddEnvironmentVariables();
+                    //builder.AddEnvironmentVariables();
                 });
     }
 }

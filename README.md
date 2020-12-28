@@ -33,7 +33,6 @@ Create an `.env` file (in the same directory as `docker-compose.yml`) and specif
 
 ```shell script
 echo "RABBITMQ_ERLANG_COOKIE=myVeryLongAndSecureSecret" > .env
-echo "RABBITMQ_DEFAULT_USER=username" >> .env
 echo "RABBITMQ_DEFAULT_PASS=password" >> .env
 ```
 
@@ -50,3 +49,6 @@ docker-compose up
 - RabbitMQ management application at http://localhost:15672
 
 You can login to RabbitMQ management application database with credentials specified in `.env` file.
+
+
+$ dotnet user-secrets set "RabbitMQSettings:Password" "password"

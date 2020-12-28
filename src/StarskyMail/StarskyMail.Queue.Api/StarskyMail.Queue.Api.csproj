@@ -1,10 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <AssemblyName>StarskyMail.Queue.Api</AssemblyName>
         <RootNamespace>StarskyMail.Queue.Api</RootNamespace>
-    </PropertyGroup>
+      <UserSecretsId>9431a1fb-444e-4bfc-8760-30587eb9a096</UserSecretsId>
+  </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.0" NoWarn="NU1605" />
@@ -16,6 +17,10 @@
 
     <ItemGroup>
       <ProjectReference Include="..\StarskyMail.Queue\StarskyMail.Queue.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Configuration" />
     </ItemGroup>
 
 </Project>
