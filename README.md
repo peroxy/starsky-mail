@@ -2,15 +2,19 @@
  Starsky mail is a service for sending verification and invite emails. 
  The service is used by [starsky-backend](https://github.com/peroxy/starsky-backend) application.
 
-It uses RabbitMQ for orderly email processing and a .NET 5.0 REST API is used to send messages to queues.
-Queues get consumed by .NET 5.0 background worker. 
+It uses RabbitMQ for orderly email processing and a .NET 5.0 REST API is used to send messages to queues. 
+The API is located inside project called **StarskyMail.Queue.Api**.
+
+Queues get consumed by .NET 5.0 background worker inside project called **StarskyMail.Queue.Consumer**.
+
+Common RabbitMQ queue components and classes are located inside class library **StarskyMail.Queue**. 
 
 ## Requirements
 
 ### Development
 - [docker](https://docs.docker.com/get-docker/)
 - [docker-compose](https://docs.docker.com/compose/install/) (at least 3.3 version support)
-
+- (_optional for debugging purposes_) [.NET 5.0](https://dotnet.microsoft.com/download/dotnet/5.0) 
 
 ## Local Development
 Please note that this has only been tested with docker on Ubuntu 20.04.
@@ -45,10 +49,19 @@ docker-compose up
 ```
 
 5. You will now be able to access:
-- RabbitMQ at http://localhost:5672
-- RabbitMQ management application at http://localhost:15672
+- RabbitMQ at http://localhost:5672,
+- RabbitMQ management application at http://localhost:15672,
+- .NET core StarskyMail.Queue.Api at http://localhost:56789. 
 
 You can login to RabbitMQ management application database with credentials specified in `.env` file.
 
+6. (Optional) If you want to debug dotnet projects locally without docker, you will have to specify RabbitMQ password by using `dotnet user-secrets`:
 
-$ dotnet user-secrets set "RabbitMQSettings:Password" "password"
+```shell script
+cd src/StarskyMail/StarskyMail.Queue.Api/
+dotnet user-secrets set "RabbitMQSettings:Password" "password"
+
+cd src/StarskyMail/StarskyMail.Queue.Consumer/
+dotnet user-secrets set "RabbitMQSettings:Password" "password"
+```
+
