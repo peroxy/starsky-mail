@@ -23,7 +23,7 @@ namespace StarskyMail.Queue.Consumer
                         .ValidateDataAnnotations();
             
                     services.AddSingleton<QueueConfiguration>();
-                    services.AddHostedService<InvitationsWorker>();
+                    services.AddHostedService<Worker>();
                 });
     }
 }

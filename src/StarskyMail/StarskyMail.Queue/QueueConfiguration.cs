@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
+using StarskyMail.Queue.Extensions;
 
 namespace StarskyMail.Queue
 {
@@ -37,7 +38,7 @@ namespace StarskyMail.Queue
         public (IConnection connection, IModel channel) CreateRabbitInfrastructure(bool closeConnection = false)
         {
             var connection = GetConnection();
-            var channel = connection.CreateModel();
+            var channel = connection.CreatePersistentChannel();
 
             var deadLetterExchange = $"dead.letter.{_rabbitSettings.ExchangeName}";
             var deadLetterQueue = $"dead.letter.{_rabbitSettings.InvitationsQueueName}";
