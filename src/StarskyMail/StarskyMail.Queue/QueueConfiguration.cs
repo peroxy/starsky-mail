@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using StarskyMail.Queue.Extensions;
+using StarskyMail.Queue.Settings;
 
 namespace StarskyMail.Queue
 {

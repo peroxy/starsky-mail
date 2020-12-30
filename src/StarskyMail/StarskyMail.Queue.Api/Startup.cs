@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using StarskyMail.Queue.Api.Services;
+using StarskyMail.Queue.Settings;
 
 namespace StarskyMail.Queue.Api
 {
@@ -26,7 +27,7 @@ namespace StarskyMail.Queue.Api
             services.AddSingleton<QueueConfiguration>();
 
             services.AddHostedService<AfterStartupService>();
-
+            
             services.AddMemoryCache();
             services.AddControllers();
             services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "StarskyMail Api", Version = "v1"}); });

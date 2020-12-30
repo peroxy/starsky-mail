@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Newtonsoft.Json;
 
 namespace StarskyMail.Queue.Models
@@ -38,6 +39,21 @@ namespace StarskyMail.Queue.Models
 
             return (true, null);
         }
+
+        public (string subject, string plainText, string html) ToEmail()
+        {
+            string htmlContent =
+                $"Dear <b>{EmployeeName}</b>,</br></br>" +
+                $"You have been invited to join Starsky Scheduling by <b>{ManagerName}</b>.</br></br>" +
+                $"You can register by pressing on the following link:</br></br>" +
+                $"<a href='{RegisterUrl}'></a>";
+
+            string plainTextContent =
+                $"Dear {EmployeeName}, you have been invited to join Starsky Scheduling by {ManagerName}. " +
+                $"You can register by pressing on the following link: {RegisterUrl}";
+
+            return ("You have been invited to Starsky Scheduling!", plainTextContent, htmlContent);
+        } 
     }
     
 }

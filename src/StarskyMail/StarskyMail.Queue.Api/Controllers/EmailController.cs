@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using RabbitMQ.Client;
 using StarskyMail.Queue.Extensions;
 using StarskyMail.Queue.Models;
+using StarskyMail.Queue.Settings;
 
 namespace StarskyMail.Queue.Api.Controllers
 {

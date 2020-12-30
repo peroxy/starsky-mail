@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace StarskyMail.Queue
+namespace StarskyMail.Queue.Settings
 {
     public record RabbitMQSettings
     {

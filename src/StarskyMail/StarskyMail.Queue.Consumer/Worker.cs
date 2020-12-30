@@ -7,8 +7,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using StarskyMail.Queue.Consumer.Services;
 using StarskyMail.Queue.Extensions;
 using StarskyMail.Queue.Models;
+using StarskyMail.Queue.Settings;
 
 namespace StarskyMail.Queue.Consumer
 {
@@ -16,12 +18,14 @@ namespace StarskyMail.Queue.Consumer
     {
         private readonly ILogger<Worker> _logger;
         private readonly QueueConfiguration _queueConfiguration;
+        private readonly SendGridService _sendGridService;
         private readonly RabbitMQSettings _rabbitSettings;
 
-        public Worker(ILogger<Worker> logger, IOptions<RabbitMQSettings> rabbitSettings, QueueConfiguration queueConfiguration)
+        public Worker(ILogger<Worker> logger, IOptions<RabbitMQSettings> rabbitSettings, QueueConfiguration queueConfiguration, SendGridService sendGridService)
         {
             _logger = logger;
             _queueConfiguration = queueConfiguration;
+            _sendGridService = sendGridService;
             _rabbitSettings = rabbitSettings.Value;
         }
 
@@ -47,7 +51,7 @@ namespace StarskyMail.Queue.Consumer
             return Task.CompletedTask;
         }
 
-        private void OnInvitationsReceived(object sender, BasicDeliverEventArgs e)
+        private async void OnInvitationsReceived(object sender, BasicDeliverEventArgs e)
         {
             var consumer = (EventingBasicConsumer) sender;
 
@@ -57,19 +61,7 @@ namespace StarskyMail.Queue.Consumer
             
             if (body.TryDeserializeJson(out InvitationsModel model))
             {
-                (bool success, string reason) = model.Validate();
-                if (success)
-                {
-                    
-                    _logger.LogTrace("Email has been sent.");
-                    consumer.Model.BasicAck(e.DeliveryTag, false);
-                    _logger.LogTrace("Message acknowledged.");
-                }
-                else
-                {
-                    consumer.Model.BasicReject(e.DeliveryTag, false);
-                    _logger.LogError($"Message rejected due to: {reason}.");
-                }
+                await ValidateInvitationsAndSend(e.DeliveryTag, model, consumer);
             }
             else
             {
@@ -77,6 +69,33 @@ namespace StarskyMail.Queue.Consumer
                 _logger.LogError($"Message rejected, could not deserialize JSON message into valid {nameof(InvitationsModel)} structure: {body}");
             }
             
+        }
+
+        private async Task ValidateInvitationsAndSend(ulong deliveryTag, InvitationsModel model, IBasicConsumer consumer)
+        {
+            (bool success, string reason) = model.Validate();
+            if (success)
+            {
+                (string subject, string plainText, string html) = model.ToEmail();
+                success = await _sendGridService.SendEmail(subject, model.EmployeeEmail, model.EmployeeName, plainText, html);
+                if (success)
+                {
+                    _logger.LogDebug("Email processed successfully.");
+                    consumer.Model.BasicAck(deliveryTag, false);
+                    _logger.LogTrace("Message acknowledged.");
+                }
+                else
+                {
+                    _logger.LogDebug("Email sending failed.");
+                    consumer.Model.BasicReject(deliveryTag, false);
+                    _logger.LogError("Message rejected because SendGrid email sending failed.");
+                }
+            }
+            else
+            {
+                consumer.Model.BasicReject(deliveryTag, false);
+                _logger.LogError($"Message rejected due to: {reason}.");
+            }
         }
     }
 }
