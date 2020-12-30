@@ -17,5 +17,11 @@ namespace StarskyMail.Queue.Settings
         [Required(AllowEmptyStrings = false)]
         public string FromAddress { get; set; }
         
+        [Required(AllowEmptyStrings = false)]
+        public string InvitationsTemplateId { get; set; }
+        
+        [Required]
+        public int InvitationsUnsubscribeGroupId { get; set; }
+        
     }
 }

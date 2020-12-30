@@ -17,13 +17,16 @@ namespace StarskyMail.Queue.Consumer
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
+        private readonly SendGridSettings _sendGridSettings;
         private readonly QueueConfiguration _queueConfiguration;
         private readonly SendGridService _sendGridService;
         private readonly RabbitMQSettings _rabbitSettings;
 
-        public Worker(ILogger<Worker> logger, IOptions<RabbitMQSettings> rabbitSettings, QueueConfiguration queueConfiguration, SendGridService sendGridService)
+        public Worker(ILogger<Worker> logger, IOptions<RabbitMQSettings> rabbitSettings, IOptions<SendGridSettings> sendGridSettings,
+            QueueConfiguration queueConfiguration, SendGridService sendGridService)
         {
             _logger = logger;
+            _sendGridSettings = sendGridSettings.Value;
             _queueConfiguration = queueConfiguration;
             _sendGridService = sendGridService;
             _rabbitSettings = rabbitSettings.Value;
@@ -37,13 +40,13 @@ namespace StarskyMail.Queue.Consumer
             using var connection = connectionInfo.connection;
             using var invitationsChannel = connectionInfo.channel;
             //using var emailVerificationsChannel = connection.CreateModel(); //use new channel for every new queue consumer..
-            
+
             var invitationsConsumer = new EventingBasicConsumer(invitationsChannel);
             invitationsConsumer.Received += OnInvitationsReceived;
             invitationsChannel.BasicConsume(_rabbitSettings.InvitationsQueueName, false, invitationsConsumer);
-            
+
             stoppingToken.WaitHandle.WaitOne(); // wait until cancellation token is canceled
-            
+
             invitationsChannel.Close();
             connection.Close();
 
@@ -58,7 +61,7 @@ namespace StarskyMail.Queue.Consumer
             string body = Encoding.UTF8.GetString(e.Body.ToArray());
 
             _logger.LogDebug($"New message in invitations queue:{Environment.NewLine}{body}");
-            
+
             if (body.TryDeserializeJson(out InvitationsModel model))
             {
                 await ValidateInvitationsAndSend(e.DeliveryTag, model, consumer);
@@ -68,7 +71,6 @@ namespace StarskyMail.Queue.Consumer
                 consumer.Model.BasicReject(e.DeliveryTag, false);
                 _logger.LogError($"Message rejected, could not deserialize JSON message into valid {nameof(InvitationsModel)} structure: {body}");
             }
-            
         }
 
         private async Task ValidateInvitationsAndSend(ulong deliveryTag, InvitationsModel model, IBasicConsumer consumer)
@@ -76,8 +78,11 @@ namespace StarskyMail.Queue.Consumer
             (bool success, string reason) = model.Validate();
             if (success)
             {
-                (string subject, string plainText, string html) = model.ToEmail();
-                success = await _sendGridService.SendEmail(subject, model.EmployeeEmail, model.EmployeeName, plainText, html);
+                var templateData = model.ToDynamicTemplateData();
+
+                success = await _sendGridService.SendEmail(_sendGridSettings.FromAddress, model.EmployeeEmail, model.EmployeeName, _sendGridSettings.InvitationsTemplateId,
+                    templateData, _sendGridSettings.InvitationsUnsubscribeGroupId);
+                
                 if (success)
                 {
                     _logger.LogDebug("Email processed successfully.");
