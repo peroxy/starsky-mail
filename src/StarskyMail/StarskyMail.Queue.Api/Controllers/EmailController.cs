@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
+using StarskyMail.Queue.Extensions;
 using StarskyMail.Queue.Models;
 
 namespace StarskyMail.Queue.Api.Controllers
@@ -36,13 +37,13 @@ namespace StarskyMail.Queue.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public ActionResult AddInvitationToQueue([FromBody] InvitationModel model)
+        public ActionResult AddInvitationToQueue([FromBody] InvitationsModel model)
         {
-            var result = ValidateInvitation(model);
-            if (result != null)
+            (bool success, string reason) = model.Validate();
+            if (!success)
             {
-                _logger.LogWarning($"Bad request due to: {result.Value}");
-                return result;
+                _logger.LogWarning($"Bad request due to: {reason}");
+                return BadRequest(reason);
             }
 
             var connectionInfo = GetCachedConnection();
@@ -79,34 +80,9 @@ namespace StarskyMail.Queue.Api.Controllers
 
                 entry.SlidingExpiration = TimeSpan.FromMinutes(1);
                 var connection = _configuration.GetConnection();
-                var model = connection.CreateModel();
+                var model = connection.CreatePersistentChannel();
                 return (connection, model);
             });
-        }
-
-        private BadRequestObjectResult ValidateInvitation(InvitationModel model)
-        {
-            if (string.IsNullOrWhiteSpace(model.EmployeeEmail) || !model.EmployeeEmail.Contains("@"))
-            {
-                return BadRequest("Email is invalid!");
-            }
-
-            if (string.IsNullOrWhiteSpace(model.EmployeeName))
-            {
-                return BadRequest("Employee name is invalid!");
-            }
-
-            if (string.IsNullOrWhiteSpace(model.ManagerName))
-            {
-                return BadRequest("Manager name is invalid!");
-            }
-
-            if (string.IsNullOrWhiteSpace(model.RegisterUrl))
-            {
-                return BadRequest("Register URL is invalid!");
-            }
-
-            return null;
         }
     }
 }
