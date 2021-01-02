@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
@@ -17,6 +18,8 @@ namespace StarskyMail.Queue.Api.Services
         {
             _logger = logger;
             _configuration = configuration;
+            
+            _logger.LogInformation($"ASPNETCORE_ENVIRONMENT: {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}");
         }
 
         public Task StartAsync(CancellationToken cancellationToken)

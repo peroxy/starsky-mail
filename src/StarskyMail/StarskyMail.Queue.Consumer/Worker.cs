@@ -31,6 +31,8 @@ namespace StarskyMail.Queue.Consumer
             _queueConfiguration = queueConfiguration;
             _sendGridService = sendGridService;
             _rabbitSettings = rabbitSettings.Value;
+
+            _logger.LogInformation($"DOTNET_ENVIRONMENT: {Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")}");
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
