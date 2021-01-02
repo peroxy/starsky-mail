@@ -13,7 +13,7 @@ services:
   api:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      "RabbitMQSettings:Password" : ${RABBITMQ_DEFAULT_PASS}
+      "RabbitMQSettings:Password": ${RABBITMQ_DEFAULT_PASS}
     build:
       context: .
       dockerfile: src/StarskyMail/StarskyMail.Queue.Api/Dockerfile
@@ -22,4 +22,19 @@ services:
     container_name: starsky_queue_api
     depends_on:
       - rabbitmq
+    network_mode: host
+  consumer:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      "RabbitMQSettings:Password": ${RABBITMQ_DEFAULT_PASS}
+      "SendGridSettings:ApiKey": ${SENDGRID_API_KEY}
+      "SendGridSettings:FromAddress": ${SENDGRID_FROM_ADDRESS}
+    build:
+      context: .
+      dockerfile: src/StarskyMail/StarskyMail.Queue.Consumer/Dockerfile
+    container_name: starsky_queue_consumer
+    restart: on-failure
+    depends_on:
+      - rabbitmq
+      - api
     network_mode: host

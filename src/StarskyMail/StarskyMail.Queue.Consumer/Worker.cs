@@ -60,7 +60,7 @@ namespace StarskyMail.Queue.Consumer
 
             string body = Encoding.UTF8.GetString(e.Body.ToArray());
 
-            _logger.LogDebug($"New message in invitations queue:{Environment.NewLine}{body}");
+            _logger.LogInformation($"New message in invitations queue:{Environment.NewLine}{body}");
 
             if (body.TryDeserializeJson(out InvitationsModel model))
             {
