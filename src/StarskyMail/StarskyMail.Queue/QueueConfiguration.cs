@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
 using StarskyMail.Queue.Extensions;
 using StarskyMail.Queue.Settings;
 
@@ -31,6 +35,45 @@ namespace StarskyMail.Queue
         public IConnection GetConnection()
         {
             return _factory.CreateConnection();
+        }
+
+        private (bool reachable, Exception brokerUnreachableException) IsRabbitReachable()
+        {
+            try
+            {
+                using var connection = GetConnection();
+                connection.Close();
+                return (true, null);
+            }
+            catch (BrokerUnreachableException e)
+            {
+                return (false, e);
+            }
+        }
+
+        public void TryConnect(ILogger logger, int retryCount)
+        {
+            for (int i = 0; i < retryCount; i++)
+            {
+                (bool reachable, var brokerUnreachableException) = IsRabbitReachable();
+                if (reachable)
+                {
+                    break;
+                }
+                else
+                {
+                    if (i == retryCount - 1)
+                    {
+                        logger.LogCritical($"RabbitMQ broker is unreachable! Can't establish a connection, will stop retrying.");
+                        throw brokerUnreachableException;
+                    }
+                    else
+                    {
+                        logger.LogWarning($"[#{i}] RabbitMQ broker is unreachable - retrying in 5 seconds..");
+                        Thread.Sleep(TimeSpan.FromSeconds(5));                        
+                    }
+                }
+            }
         }
 
         /// <summary>

@@ -19,13 +19,14 @@ namespace StarskyMail.Queue.Consumer.Services
         {
             _logger = logger;
             _settings = settings.Value;
+            _logger.LogInformation($"Configuration - SendGrid sending enabled: {_settings.Enabled}");
         }
 
         public async Task<bool> SendEmail(string fromAddress, string toAddress, string toName, string templateId, object templateData, int unsubscribeGroupId)
         {
             if (!_settings.Enabled)
             {
-                _logger.LogDebug("SendGrid sending is disabled in appsettings. Will not send an email.");
+                _logger.LogWarning("SendGrid sending is disabled in appsettings. Will not send an email.");
                 return true;
             }
 

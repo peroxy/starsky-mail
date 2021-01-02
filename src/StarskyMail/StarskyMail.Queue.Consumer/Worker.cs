@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
 using StarskyMail.Queue.Consumer.Services;
 using StarskyMail.Queue.Extensions;
 using StarskyMail.Queue.Models;
@@ -35,6 +36,8 @@ namespace StarskyMail.Queue.Consumer
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             Console.WriteLine($"The {nameof(Worker)} service has been started!");
+
+            _queueConfiguration.TryConnect(_logger, 5);
 
             var connectionInfo = _queueConfiguration.CreateRabbitInfrastructure();
             using var connection = connectionInfo.connection;
