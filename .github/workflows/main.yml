@@ -14,12 +14,12 @@ jobs:
       # Checks out a copy of your repository on the ubuntu-latest machine
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Extract Git Tag # used for docker tags
-        run: echo "GIT_TAG=${GITHUB_REF/refs\/tags\//:1}" >> $GITHUB_ENV
-      - name: Echo git tag and current dir
+      - name: Extract Git Tag
         run: |
-          echo '${{ env.GIT_TAG }}'
-          ls -lh
+          echo "GIT_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
+          echo "GIT_TAG=${GIT_TAG:1}" >> $GITHUB_ENV
+      - name: Echo git tag and current dir
+        run: echo '${{ env.GIT_TAG }}'
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
@@ -43,4 +43,3 @@ jobs:
           file: src/StarskyMail/StarskyMail.Queue.Consumer/Dockerfile
           push: true
           tags: '${{ secrets.DOCKERHUB_USERNAME }}/starsky-mail-consumer:${{ env.GIT_TAG }}'
-            
