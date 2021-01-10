@@ -15,7 +15,6 @@ using StarskyMail.Queue.Settings;
 namespace StarskyMail.Queue.Api.Controllers
 {
     [ApiController]
-    [Route("/emails")]
     public class EmailController : ControllerBase
     {
         private readonly ILogger<EmailController> _logger;
