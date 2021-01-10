@@ -31,11 +31,11 @@ jobs:
           context: .
           file: src/StarskyMail/StarskyMail.Queue.Api/Dockerfile
           push: true
-          tags: '${{ secrets.DOCKERHUB_USERNAME }}/starsky-mail-api:${{ env.GIT_TAG }}'
+          tags: '${{ secrets.DOCKERHUB_USERNAME }}/starsky/starsky-mail-api:${{ env.GIT_TAG }}'
       - name: Build and push starsky-mail queue consumer
         uses: docker/build-push-action@v2
         with:
           context: .
           file: src/StarskyMail/StarskyMail.Queue.Consumer/Dockerfile
           push: true
-          tags: '${{ secrets.DOCKERHUB_USERNAME }}/starsky-mail-consumer:${{ env.GIT_TAG }}'
+          tags: '${{ secrets.DOCKERHUB_USERNAME }}/starsky/starsky-mail-consumer:${{ env.GIT_TAG }}'
