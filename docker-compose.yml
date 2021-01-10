@@ -3,17 +3,12 @@ services:
   rabbitmq:
     image: rabbitmq:3.8.9-management-alpine
     container_name: rabbitmq
-    environment:
-      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE}
-      RABBITMQ_DEFAULT_USER: starsky
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     ports:
       - 5672:5672
       - 15672:15672
   api:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      "RabbitMQSettings:Password": ${RABBITMQ_DEFAULT_PASS}
     build:
       context: .
       dockerfile: src/StarskyMail/StarskyMail.Queue.Api/Dockerfile
@@ -27,9 +22,6 @@ services:
   consumer:
     environment:
       DOTNET_ENVIRONMENT: Development
-      "RabbitMQSettings:Password": ${RABBITMQ_DEFAULT_PASS}
-      "SendGridSettings:ApiKey": ${SENDGRID_API_KEY}
-      "SendGridSettings:FromAddress": ${SENDGRID_FROM_ADDRESS}
     build:
       context: .
       dockerfile: src/StarskyMail/StarskyMail.Queue.Consumer/Dockerfile

@@ -1,0 +1,20 @@
+version: "3.3"
+services:
+  rabbitmq:
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "this is a secret cookie value"
+      RABBITMQ_DEFAULT_USER: starsky
+      RABBITMQ_DEFAULT_PASS: starsky
+    ports:
+      - 5672:5672
+      - 15672:15672
+  api:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      "RabbitMQSettings:Password": starsky
+  consumer:
+    environment:
+      DOTNET_ENVIRONMENT: Development
+      "RabbitMQSettings:Password": starsky
+      "SendGridSettings:ApiKey": ${SENDGRID_API_KEY}
+      "SendGridSettings:FromAddress": ${SENDGRID_FROM_ADDRESS}
