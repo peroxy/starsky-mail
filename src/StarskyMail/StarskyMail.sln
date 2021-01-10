@@ -12,6 +12,7 @@ ProjectSection(SolutionItems) = preProject
 	..\..\.dockerignore = ..\..\.dockerignore
 	..\..\docker-compose.override.yml = ..\..\docker-compose.override.yml
 	..\..\docker-compose.prod.yml = ..\..\docker-compose.prod.yml
+	..\..\.github\workflows\main.yml = ..\..\.github\workflows\main.yml
 EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarskyMail.Queue", "StarskyMail.Queue\StarskyMail.Queue.csproj", "{6E726977-A98D-4787-BED0-C11AB1950EDA}"
