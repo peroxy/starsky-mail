@@ -58,6 +58,7 @@ namespace StarskyMail.Queue
                 (bool reachable, var brokerUnreachableException) = IsRabbitReachable();
                 if (reachable)
                 {
+                    logger.LogInformation($"RabbitMQ broker is reachable! Success!");
                     break;
                 }
                 else
