@@ -38,4 +38,6 @@ jobs:
           context: .
           file: src/StarskyMail/StarskyMail.Queue.Consumer/Dockerfile
           push: true
-          tags: '${{ secrets.DOCKERHUB_USERNAME }}/starsky-mail-consumer:${{ env.GIT_TAG }}'
+          tags: |
+            '${{ secrets.DOCKERHUB_USERNAME }}/starsky-mail-consumer:latest'
+            '${{ secrets.DOCKERHUB_USERNAME }}/starsky-mail-consumer:${{ env.GIT_TAG }}'
