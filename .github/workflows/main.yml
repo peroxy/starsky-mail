@@ -9,11 +9,17 @@ on:
 
 jobs:
   build:
+    name: Build and deploy to DockerHub and Azure VM
     runs-on: ubuntu-latest
     steps:
       # Checks out a copy of your repository on the ubuntu-latest machine
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Create docker-compose deployment source folder
+        run: |
+          mkdir docker-compose
+          cp docker-compose.yml docker-compose/
+          cp docker-compose.prod.yml docker-compose/
       - name: Extract Git Tag
         run: echo "GIT_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV 
       - name: Set up QEMU
@@ -43,3 +49,11 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/starsky-mail-consumer:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/starsky-mail-consumer:${{ env.GIT_TAG }}
+      - name: Deploy to Azure VM
+        uses: easingthemes/ssh-deploy@v2.1.5
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SOURCE: "docker-compose/"
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          TARGET: "~/docker/starsky-mail/"
