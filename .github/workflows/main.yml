@@ -54,6 +54,6 @@ jobs:
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
-          source: "docker-compose/"
+          source: "docker-compose/*"
           target: "~/docker/starsky-mail/"
           key: ${{ secrets.SERVER_SSH_KEY }}          
