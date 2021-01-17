@@ -15,11 +15,6 @@ jobs:
       # Checks out a copy of your repository on the ubuntu-latest machine
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Create docker-compose deployment source folder
-        run: |
-          mkdir docker-compose
-          cp docker-compose.yml docker-compose/
-          cp docker-compose.prod.yml docker-compose/
       - name: Extract Git Tag
         run: echo "GIT_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV 
      # - name: Set up QEMU
@@ -54,6 +49,6 @@ jobs:
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
-          source: "docker-compose/*"
+          source: "docker-compose.yml,docker-compose.prod.yml"
           target: "~/docker/starsky-mail/"
           key: ${{ secrets.SERVER_SSH_KEY }}          
