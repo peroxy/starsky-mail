@@ -11,6 +11,7 @@ services:
   api:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      "RabbitMQSettings:Username": starsky
       "RabbitMQSettings:Password": starsky
   consumer:
     environment:
