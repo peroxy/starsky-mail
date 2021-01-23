@@ -20,6 +20,7 @@ services:
     image: peroxy12/starsky-mail-consumer:latest
     environment:
       DOTNET_ENVIRONMENT: Production
+      "RabbitMQSettings:Username": ${RABBITMQ_DEFAULT_USER}
       "RabbitMQSettings:Password": ${RABBITMQ_DEFAULT_PASS}
       "SendGridSettings:ApiKey": ${SENDGRID_API_KEY}
       "SendGridSettings:FromAddress": ${SENDGRID_FROM_ADDRESS}
