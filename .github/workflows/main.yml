@@ -15,6 +15,13 @@ jobs:
       # Checks out a copy of your repository on the ubuntu-latest machine
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Create .env file with secrets
+        run: |
+          echo "SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}" > .env
+          echo "SENDGRID_FROM_ADDRESS=${{ secrets.SENDGRID_FROM_ADDRESS }}" >> .env
+          echo "RABBITMQ_ERLANG_COOKIE=${{ secrets.RABBITMQ_ERLANG_COOKIE }}" >> .env
+          echo "RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}" >> .env
+          echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> .env
       - name: Extract Git Tag
         run: echo "GIT_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV 
      # - name: Set up QEMU
@@ -49,6 +56,20 @@ jobs:
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
-          source: "docker-compose.yml,docker-compose.prod.yml"
+          source: "docker-compose.yml,docker-compose.prod.yml,.env"
           target: "~/docker/starsky-mail/"
-          key: ${{ secrets.SERVER_SSH_KEY }}          
+          key: ${{ secrets.SERVER_SSH_KEY }}         
+      - name: Stop, pull and start application on Azure VM
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd ~/docker/starsky-mail/
+            docker-compose -f docker-compose.yml -f docker-compose.prod.yml stop
+            docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull
+            docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+            
+          
+           
