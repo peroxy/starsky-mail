@@ -67,7 +67,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd ~/docker/starsky-mail/
-            docker-compose -f docker-compose.yml -f docker-compose.prod.yml stop
+            docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
             docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull
             docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
             
