@@ -12,3 +12,5 @@ Dockerfile*
 .git/
 log.txt
 **/.idea/
+
+**/appsettings.Local.json

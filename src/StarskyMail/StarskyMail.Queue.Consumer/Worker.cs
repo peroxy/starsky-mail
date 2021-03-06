@@ -39,7 +39,7 @@ namespace StarskyMail.Queue.Consumer
         {
             Console.WriteLine($"The {nameof(Worker)} service has been started!");
 
-            _queueConfiguration.TryConnect(_logger, 5);
+            _queueConfiguration.TryConnect(5);
 
             var connectionInfo = _queueConfiguration.CreateRabbitInfrastructure();
             using var connection = connectionInfo.connection;

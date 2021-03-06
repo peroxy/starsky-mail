@@ -14,13 +14,15 @@ namespace StarskyMail.Queue
 {
     public class QueueConfiguration
     {
+        private readonly ILogger<QueueConfiguration> _logger;
         private readonly ConnectionFactory _factory;
         private readonly RabbitMQSettings _rabbitSettings;
         
         private const string DeadLetterExchangeArgument = "x-dead-letter-exchange";
 
-        public QueueConfiguration(IOptions<RabbitMQSettings> configuration)
+        public QueueConfiguration(IOptions<RabbitMQSettings> configuration, ILogger<QueueConfiguration> logger)
         {
+            _logger = logger;
             _rabbitSettings = configuration.Value;
             
             _factory = new ConnectionFactory
@@ -51,29 +53,25 @@ namespace StarskyMail.Queue
             }
         }
 
-        public void TryConnect(ILogger logger, int retryCount)
+        public void TryConnect(int retryCount)
         {
             for (int i = 0; i < retryCount; i++)
             {
                 (bool reachable, var brokerUnreachableException) = IsRabbitReachable();
                 if (reachable)
                 {
-                    logger.LogInformation($"RabbitMQ broker is reachable! Success!");
+                    _logger.LogInformation($"RabbitMQ broker is reachable at {_factory.HostName}:{_factory.Port} - success");
                     break;
                 }
-                else
+
+                if (i == retryCount - 1)
                 {
-                    if (i == retryCount - 1)
-                    {
-                        logger.LogCritical($"RabbitMQ broker is unreachable! Can't establish a connection, will stop retrying.");
-                        throw brokerUnreachableException;
-                    }
-                    else
-                    {
-                        logger.LogWarning($"[#{i}] RabbitMQ broker is unreachable - retrying in 5 seconds..");
-                        Thread.Sleep(TimeSpan.FromSeconds(5));                        
-                    }
+                    _logger.LogCritical($"RabbitMQ broker is unreachable at {_factory.HostName}:{_factory.Port}, can't establish a connection, will stop retrying");
+                    throw brokerUnreachableException;
                 }
+
+                _logger.LogWarning($"[#{i}] RabbitMQ broker is unreachable at at {_factory.HostName}:{_factory.Port} - retrying in 5 seconds..");
+                Thread.Sleep(TimeSpan.FromSeconds(5));
             }
         }
 

@@ -24,7 +24,7 @@ namespace StarskyMail.Queue.Api.Services
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _configuration.TryConnect(_logger, 5);
+            _configuration.TryConnect(5);
             _configuration.CreateRabbitInfrastructure(true);
 
             _logger.LogInformation("Created RabbitMQ infrastructure sucessfully.");

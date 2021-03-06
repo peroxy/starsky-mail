@@ -20,12 +20,9 @@ namespace StarskyMail.Queue.Consumer
         private static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration((context, builder) =>
+                .ConfigureAppConfiguration((_, builder) =>
                 {
-                    if (context.HostingEnvironment.IsDevelopment())
-                    {
-                        builder.AddUserSecrets<Program>();
-                    }
+                    builder.AddJsonFile("appsettings.Local.json", true, true);
                 })
                 .ConfigureServices((hostContext, services) =>
                 {

@@ -1,4 +1,4 @@
-version: "3.3"
+version: "3.8"
 services:
   rabbitmq:
     environment:
@@ -8,7 +8,7 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
-  api:
+  mail-api:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       "RabbitMQSettings:Username": starsky
@@ -16,6 +16,7 @@ services:
   consumer:
     environment:
       DOTNET_ENVIRONMENT: Development
+      "RabbitMQSettings:Username": starsky
       "RabbitMQSettings:Password": starsky
       "SendGridSettings:ApiKey": ${SENDGRID_API_KEY}
       "SendGridSettings:FromAddress": ${SENDGRID_FROM_ADDRESS}

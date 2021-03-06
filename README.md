@@ -13,7 +13,7 @@ Common RabbitMQ queue components and classes are located inside class library **
 
 ### Development
 - [docker](https://docs.docker.com/get-docker/),
-- [docker-compose](https://docs.docker.com/compose/install/) (at least 3.3 version support),
+- [docker-compose](https://docs.docker.com/compose/install/) (at least 3.8 version support),
 - (_optional: for debugging purposes_) [.NET 5.0](https://dotnet.microsoft.com/download/dotnet/5.0),
 - (_optional: if you want to actually send emails while debugging_) SendGrid API key.
 
@@ -91,7 +91,7 @@ We host entire infrastructure inside Azure, specifically inside Azure Virtual Ma
 The server (in our case Azure VM) must have these installed:
 
 - [docker](https://docs.docker.com/get-docker/),
-- [docker-compose](https://docs.docker.com/compose/install/) (at least 3.3 version support).
+- [docker-compose](https://docs.docker.com/compose/install/) (at least 3.8 version support).
 
 #### Setup on Azure Virtual Machine:
 1. Create Azure Virtual Machine with Ubuntu installed and setup your public SSH key. Ubuntu 18.04 was used at the time of writing this.
@@ -144,8 +144,6 @@ These are the required secrets that should be stored inside Github repository se
 - SendGrid:
    - `SENDGRID_API_KEY` - [SendGrid](https://sendgrid.com/) API token that has permission to send emails 
    - `SENDGRID_FROM_ADDRESS` - email address to send transactionals emails from, the sender's email address
-
-
 
 ### How to deploy
 

@@ -1,4 +1,4 @@
-version: "3.3"
+version: "3.8"
 services:
   rabbitmq:
     image: rabbitmq:3.8.9-management-alpine
@@ -6,7 +6,9 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
-  api:
+    networks: 
+      - starskynet
+  mail-api:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
     build:
@@ -14,20 +16,25 @@ services:
       dockerfile: src/StarskyMail/StarskyMail.Queue.Api/Dockerfile
     ports:
       - 56789:56789
+    networks:
+      - starskynet
     container_name: starsky_queue_api
     restart: on-failure
     depends_on:
       - rabbitmq
-    network_mode: host
   consumer:
     environment:
       DOTNET_ENVIRONMENT: Development
     build:
       context: .
       dockerfile: src/StarskyMail/StarskyMail.Queue.Consumer/Dockerfile
+    networks:
+      - starskynet
     container_name: starsky_queue_consumer
     restart: on-failure
     depends_on:
       - rabbitmq
-      - api
-    network_mode: host
+      - mail-api
+networks:
+  starskynet:
+    name: starsky_network

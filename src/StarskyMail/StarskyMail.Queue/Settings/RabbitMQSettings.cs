@@ -15,7 +15,7 @@ namespace StarskyMail.Queue.Settings
         [Required(AllowEmptyStrings = false)] public string InvitationsQueueName { get; set; }
         [Required(AllowEmptyStrings = false)] public string InvitationsRoutingKey { get; set; }
 
-        public string Hostname { get; set; } = "localhost";
+        public string Hostname { get; set; } = "rabbitmq";
         public int Port { get; set; } = 5672;
     }
 }

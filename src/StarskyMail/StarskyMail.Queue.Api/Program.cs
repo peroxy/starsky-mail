@@ -13,6 +13,10 @@ namespace StarskyMail.Queue.Api
 
         private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((_, builder) =>
+                {
+                    builder.AddJsonFile("appsettings.Local.json", true, true);
+                })
                 .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
     }
 }
