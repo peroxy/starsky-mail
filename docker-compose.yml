@@ -2,7 +2,6 @@ version: "3.8"
 services:
   rabbitmq:
     image: rabbitmq:3.8.9-management-alpine
-    container_name: rabbitmq
     ports:
       - 5672:5672
       - 15672:15672
@@ -18,7 +17,6 @@ services:
       - 56789:56789
     networks:
       - starskynet
-    container_name: starsky_queue_api
     restart: on-failure
     depends_on:
       - rabbitmq
@@ -30,7 +28,6 @@ services:
       dockerfile: src/StarskyMail/StarskyMail.Queue.Consumer/Dockerfile
     networks:
       - starskynet
-    container_name: starsky_queue_consumer
     restart: on-failure
     depends_on:
       - rabbitmq
