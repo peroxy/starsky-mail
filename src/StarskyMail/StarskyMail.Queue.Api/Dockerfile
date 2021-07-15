@@ -11,4 +11,6 @@ FROM mcr.microsoft.com/dotnet/runtime-deps:5.0-alpine-amd64
 WORKDIR /app
 COPY --from=build /app ./
 
+EXPOSE 56789
+
 ENTRYPOINT ["./StarskyMail.Queue.Api"]
