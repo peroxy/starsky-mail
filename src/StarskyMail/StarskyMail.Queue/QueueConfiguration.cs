@@ -84,11 +84,16 @@ namespace StarskyMail.Queue
             var channel = connection.CreatePersistentChannel();
 
             var deadLetterExchange = $"dead.letter.{_rabbitSettings.ExchangeName}";
-            var deadLetterQueue = $"dead.letter.{_rabbitSettings.InvitationsQueueName}";
+            var invitationsDeadLetter = $"dead.letter.{_rabbitSettings.InvitationsQueueName}";
+            var scheduleNotifyDeadLetter = $"dead.letter.{_rabbitSettings.ScheduleNotifyQueueName}";
             
             channel.ExchangeDeclare(deadLetterExchange, ExchangeType.Fanout, true);
-            channel.QueueDeclare(deadLetterQueue, true, false, false);
-            channel.QueueBind(deadLetterQueue, deadLetterExchange, "dead.letter");
+            
+            channel.QueueDeclare(invitationsDeadLetter, true, false, false);
+            channel.QueueBind(invitationsDeadLetter, deadLetterExchange, "dead.letter");
+            
+            channel.QueueDeclare(scheduleNotifyDeadLetter, true, false, false);
+            channel.QueueBind(scheduleNotifyDeadLetter, deadLetterExchange, "dead.letter");
             
             channel.ExchangeDeclare(_rabbitSettings.ExchangeName, ExchangeType.Direct, true);
             
@@ -98,6 +103,13 @@ namespace StarskyMail.Queue
                 false,
                 new Dictionary<string, object> {{DeadLetterExchangeArgument, deadLetterExchange}});
             channel.QueueBind(_rabbitSettings.InvitationsQueueName, _rabbitSettings.ExchangeName, _rabbitSettings.InvitationsRoutingKey);
+            
+            channel.QueueDeclare(_rabbitSettings.ScheduleNotifyQueueName,
+                true,
+                false,
+                false,
+                new Dictionary<string, object> {{DeadLetterExchangeArgument, deadLetterExchange}});
+            channel.QueueBind(_rabbitSettings.ScheduleNotifyQueueName, _rabbitSettings.ExchangeName, _rabbitSettings.ScheduleNotifyRoutingKey);
 
             if (closeConnection)
             {

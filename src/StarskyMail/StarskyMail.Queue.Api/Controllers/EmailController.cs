@@ -11,6 +11,7 @@ using RabbitMQ.Client;
 using StarskyMail.Queue.Extensions;
 using StarskyMail.Queue.Models;
 using StarskyMail.Queue.Settings;
+using IModel = RabbitMQ.Client.IModel;
 
 namespace StarskyMail.Queue.Api.Controllers
 {
@@ -36,8 +37,8 @@ namespace StarskyMail.Queue.Api.Controllers
         [Route("/invitations")]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        [ProducesResponseType((int)HttpStatusCode.OK)]
-        public ActionResult AddInvitationToQueue([FromBody] InvitationsModel model)
+        [ProducesResponseType((int)HttpStatusCode.Accepted)]
+        public ActionResult AddInvitationToQueue([FromBody] InvitationsMailModel model)
         {
             (bool success, string reason) = model.Validate();
             if (!success)
@@ -54,7 +55,32 @@ namespace StarskyMail.Queue.Api.Controllers
                 null,
                 Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model)));
             
-            return Ok();
+            return Accepted();
+        }
+        
+        [HttpPost]
+        [Route("/schedule-notifications")]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.Accepted)]
+        public ActionResult AddScheduleNotifyToQueue([FromBody] ScheduleNotifyModel model)
+        {
+            (bool success, string reason) = model.Validate();
+            if (!success)
+            {
+                _logger.LogWarning($"Bad request due to: {reason}");
+                return BadRequest(reason);
+            }
+
+            var connectionInfo = GetCachedConnection();
+
+            connectionInfo.Channel.BasicPublish(
+                _rabbitSettings.ExchangeName,
+                _rabbitSettings.ScheduleNotifyRoutingKey,
+                null,
+                Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model)));
+            
+            return Accepted();
         }
 
         private (IConnection Connection, IModel Channel) GetCachedConnection()

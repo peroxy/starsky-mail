@@ -44,49 +44,68 @@ namespace StarskyMail.Queue.Consumer
             var connectionInfo = _queueConfiguration.CreateRabbitInfrastructure();
             using var connection = connectionInfo.connection;
             using var invitationsChannel = connectionInfo.channel;
-            //using var emailVerificationsChannel = connection.CreateModel(); //use new channel for every new queue consumer..
+            using var scheduleNotifyChannel = connection.CreateModel(); //use new channel for every new queue consumer..
 
             var invitationsConsumer = new EventingBasicConsumer(invitationsChannel);
             invitationsConsumer.Received += OnInvitationsReceived;
             invitationsChannel.BasicConsume(_rabbitSettings.InvitationsQueueName, false, invitationsConsumer);
+            
+            var scheduleNotifyConsumer = new EventingBasicConsumer(scheduleNotifyChannel);
+            scheduleNotifyConsumer.Received += OnScheduleNotifyReceived;
+            scheduleNotifyChannel.BasicConsume(_rabbitSettings.ScheduleNotifyQueueName, false, scheduleNotifyConsumer);
 
             stoppingToken.WaitHandle.WaitOne(); // wait until cancellation token is canceled
 
             invitationsChannel.Close();
+            scheduleNotifyChannel.Close();
             connection.Close();
 
             Console.WriteLine($"The {nameof(Worker)} service has been stopped!");
             return Task.CompletedTask;
         }
-
-        private async void OnInvitationsReceived(object sender, BasicDeliverEventArgs e)
+        
+        private async void OnScheduleNotifyReceived(object sender, BasicDeliverEventArgs e)
         {
             var consumer = (EventingBasicConsumer) sender;
-
             string body = Encoding.UTF8.GetString(e.Body.ToArray());
+            _logger.LogInformation($"New message in schedule notify queue:{Environment.NewLine}{body}");
 
-            _logger.LogInformation($"New message in invitations queue:{Environment.NewLine}{body}");
-
-            if (body.TryDeserializeJson(out InvitationsModel model))
+            if (body.TryDeserializeJson(out ScheduleNotifyModel model))
             {
-                await ValidateInvitationsAndSend(e.DeliveryTag, model, consumer);
+                await ValidateAndSend(e.DeliveryTag, model, consumer, model.EmployeeEmail, model.EmployeeName, _sendGridSettings.ScheduleNotificationTemplateId);
             }
             else
             {
                 consumer.Model.BasicReject(e.DeliveryTag, false);
-                _logger.LogError($"Message rejected, could not deserialize JSON message into valid {nameof(InvitationsModel)} structure: {body}");
+                _logger.LogError($"Message rejected, could not deserialize JSON message into valid {nameof(InvitationsMailModel)} structure: {body}");
             }
         }
 
-        private async Task ValidateInvitationsAndSend(ulong deliveryTag, InvitationsModel model, IBasicConsumer consumer)
+        private async void OnInvitationsReceived(object sender, BasicDeliverEventArgs e)
+        {
+            var consumer = (EventingBasicConsumer) sender;
+            string body = Encoding.UTF8.GetString(e.Body.ToArray());
+            _logger.LogInformation($"New message in invitations queue:{Environment.NewLine}{body}");
+
+            if (body.TryDeserializeJson(out InvitationsMailModel model))
+            {
+                await ValidateAndSend(e.DeliveryTag, model, consumer, model.EmployeeEmail, model.EmployeeName, _sendGridSettings.InvitationsTemplateId);
+            }
+            else
+            {
+                consumer.Model.BasicReject(e.DeliveryTag, false);
+                _logger.LogError($"Message rejected, could not deserialize JSON message into valid {nameof(InvitationsMailModel)} structure: {body}");
+            }
+        }
+
+        private async Task ValidateAndSend(ulong deliveryTag, IMailModel model, IBasicConsumer consumer, string toAddress, string toName, string templateId)
         {
             (bool success, string reason) = model.Validate();
             if (success)
             {
                 var templateData = model.ToDynamicTemplateData();
 
-                success = await _sendGridService.SendEmail(_sendGridSettings.FromAddress, model.EmployeeEmail, model.EmployeeName, _sendGridSettings.InvitationsTemplateId,
-                    templateData, _sendGridSettings.InvitationsUnsubscribeGroupId);
+                success = await _sendGridService.SendEmail(_sendGridSettings.FromAddress, toAddress, toName, templateId, templateData, _sendGridSettings.UnsubscribeGroupId);
                 
                 if (success)
                 {

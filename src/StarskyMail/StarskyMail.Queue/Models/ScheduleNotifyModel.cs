@@ -1,16 +1,9 @@
 using System;
-using System.Text;
 using Newtonsoft.Json;
 
 namespace StarskyMail.Queue.Models
 {
-    public interface IMailModel
-    {
-        (bool success, string reason) Validate();
-        object ToDynamicTemplateData();
-    }
-
-    public record InvitationsMailModel : IMailModel
+    public record ScheduleNotifyModel : IMailModel
     {
         [JsonProperty(Required = Required.Always)]
         public string ManagerName { get; init; }
@@ -22,7 +15,13 @@ namespace StarskyMail.Queue.Models
         public string EmployeeEmail { get; init; }
 
         [JsonProperty(Required = Required.Always)]
-        public string RegisterUrl { get; init; }
+        public string StarskyHomeUrl { get; init; }
+
+        [JsonProperty(Required = Required.Always)]
+        public string ScheduleDate { get; init; }
+
+        [JsonProperty(Required = Required.Always)]
+        public string Shifts { get; init; }
 
         public (bool success, string reason) Validate()
         {
@@ -41,9 +40,19 @@ namespace StarskyMail.Queue.Models
                 return (false, "Manager name is invalid!");
             }
 
-            if (string.IsNullOrWhiteSpace(RegisterUrl) || !Uri.IsWellFormedUriString(RegisterUrl, UriKind.Absolute))
+            if (string.IsNullOrWhiteSpace(StarskyHomeUrl) || !Uri.IsWellFormedUriString(StarskyHomeUrl, UriKind.Absolute))
             {
-                return (false, "Register URL is invalid!");
+                return (false, "Home URL is invalid!");
+            }
+
+            if (string.IsNullOrWhiteSpace(ScheduleDate))
+            {
+                return (false, "Schedule date is invalid!");
+            }
+
+            if (string.IsNullOrWhiteSpace(Shifts))
+            {
+                return (false, "Shifts are invalid!");
             }
 
             return (true, null);
@@ -55,7 +64,9 @@ namespace StarskyMail.Queue.Models
             {
                 EmployeeName,
                 ManagerName,
-                RegisterUrl
+                ScheduleDate,
+                Shifts,
+                StarskyHomeUrl
             };
         }
     }
