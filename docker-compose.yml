@@ -3,8 +3,8 @@ services:
   rabbitmq:
     image: rabbitmq:3.8.9-management-alpine
     ports:
-      - 5672:5672
-      - 15672:15672
+      - "5672:5672"
+      - "15672:15672"
     networks: 
       - starskynet
   mail-api:
@@ -14,7 +14,7 @@ services:
       context: .
       dockerfile: src/StarskyMail/StarskyMail.Queue.Api/Dockerfile
     ports:
-      - 56789:56789
+      - "56789:56789"
     networks:
       - starskynet
     restart: on-failure
